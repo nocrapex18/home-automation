@@ -1,0 +1,78 @@
+#include <IRremote.h>
+
+const int pingPin=A0;
+const int pinIR = 7;
+const int led1 = 3;
+const int led2 = 4; // Corrected typo here (was 4;)
+const int led3 = 5;
+const int motorPin=6;
+const int led4 = 2;
+
+
+int remoteValue;
+
+void setup() {
+  pinMode(pinIR, INPUT);
+  IrReceiver.begin(pinIR);
+  Serial.begin(9600);
+  
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(led4, OUTPUT);
+  pinMode(motorPin,OUTPUT);
+  
+  turnOffAllLEDs();
+}
+
+void turnOffAllLEDs() {
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+}
+
+void loop() {
+long duration;
+int distance;
+pinMode(pingPin, OUTPUT);
+digitalWrite(pingPin, LOW);
+delayMicroseconds(2);
+digitalWrite(pingPin, HIGH);
+delayMicroseconds(5);
+digitalWrite(pingPin, LOW);
+pinMode(pingPin, INPUT);
+duration = pulseIn(pingPin, HIGH);
+distance = duration / 29 / 2;
+
+  if (distance < 40){
+    digitalWrite(led4, HIGH);
+} else {
+    digitalWrite(led4, LOW);
+}
+     if (IrReceiver.decode()) {
+    remoteValue = IrReceiver.decodedIRData.command;
+    Serial.println(remoteValue);
+    IrReceiver.resume(); // Enable receiving of the next value
+
+    if (remoteValue == 0) // Power button
+    {
+      turnOffAllLEDs();
+    }
+    else if (remoteValue == 16) // Button for LED 1
+    {
+      digitalWrite(led1, !digitalRead(led1)); // Toggle LED 1
+    }
+    else if (remoteValue == 17) // Button for LED 2
+    {
+      digitalWrite(led2, !digitalRead(led2)); // Toggle LED 2
+    }
+    else if (remoteValue == 18) // Button for LED 3
+    {
+      digitalWrite(led3, !digitalRead(led3)); // Toggle LED 3 (Corrected IdigitalRead to !digitalRead)
+    }
+    else if (remoteValue == 19)
+    {
+      digitalWrite(motorPin,!digitalRead(motorPin));
+  }
+}
+}
